@@ -5,7 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.shuanghu.stock.MainActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@drawable/restaurant"
+    android:paddingLeft="30dp"
+    android:paddingRight="30dp"
+    tools:ignore="ExtraText">
 
     <AutoCompleteTextView
         android:layout_width="match_parent"
@@ -13,12 +17,83 @@
         android:id="@+id/search_box"
         />
 
+    // Button groups
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        >
+        <TextView
+            android:id="@+id/btn_getQuote"
+            android:layout_width="0dip"
+            android:layout_weight=".5"
+            android:layout_height="wrap_content"
+            android:text="Get Quote"
+            android:textSize="24sp"
+            android:textAlignment="center"
+            />
+
+        <TextView
+            android:id="@+id/btn_clear"
+            android:layout_width="0dip"
+            android:layout_weight=".5"
+            android:layout_height="wrap_content"
+            android:text="Clear"
+            android:textSize="24sp"
+            android:textAlignment="center"
+            />
+    </LinearLayout>
+
+    // Fav List
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        // Fav List Header
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_weight=".4"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="Favorites"
+                android:textSize="18sp"/>
+            // AutoRefresh Buttons
+            <LinearLayout
+                android:layout_weight=".5"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Autorefresh"
+                    android:layout_marginEnd="5dp"
+                    android:textSize="18sp"/>
+                <Switch
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_menu_refresh" />
+            </LinearLayout>
+
+        </LinearLayout>
 
 
+        <ListView
+            android:id="@+id/stock_list_view"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:background="#fff">
+        </ListView>
 
-    <Button
-        android:id="@+id/searchButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+
 
 </LinearLayout>

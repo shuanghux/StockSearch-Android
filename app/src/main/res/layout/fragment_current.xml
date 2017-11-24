@@ -1,0 +1,78 @@
+
+
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.shuanghu.stock.CurrentFragment"
+android:id="@+id/scrollView1"
+android:background="#FFFFFF"
+android:layout_width="match_parent"
+android:fillViewport="true"
+android:layout_height="match_parent" >
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        >
+
+        <!-- TODO: Update blank fragment layout -->
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="70dp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:textSize="30sp"
+                android:layout_margin="10dp"
+                android:textColor="#000"
+                android:text="Stock Detail"/>
+            <LinearLayout
+                android:layout_weight="0.6"
+                android:layout_width="0dip"
+                android:layout_height="fill_parent">
+                <Button
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/facebook"
+                    android:layout_margin="10dp"
+                    />
+                <Button
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/empty"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/stock_table"
+            android:layout_width="fill_parent"
+            android:layout_height="250dp">
+
+        </ListView>
+
+        <!--Indicator,Order,webview-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <WebView
+                android:id="@+id/main_webview"
+                android:layout_width="match_parent"
+                android:layout_height="600dp">
+
+            </WebView>
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+
+</ScrollView>
