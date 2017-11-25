@@ -15,11 +15,15 @@ import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -43,8 +47,12 @@ public class CurrentFragment extends Fragment {
     ListView tableListView;
     private JSONObject tableInfoData;
     WebView webView;
+    Button changeBtn;
+    View rootView;
     String jsMessage;
     String target_symb;
+    String curr_type = "PRICE";
+    boolean isTypeChanged = false;
 
 
     @Override
@@ -56,9 +64,12 @@ public class CurrentFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         target_symb = getActivity().getIntent().getExtras().getString(MainActivity.EXTRA_SYMB_KEY);
-        View rootView = inflater.inflate(R.layout.fragment_current, container, false);
+        rootView = inflater.inflate(R.layout.fragment_current, container, false);
         tableListView = (ListView) rootView.findViewById(R.id.stock_table);
         searchStock(target_symb);
+
+        // Btn Change init
+        initChangeBtn();
 
         // HighChart init
         webView = (WebView) rootView.findViewById(R.id.main_webview);
@@ -87,6 +98,30 @@ public class CurrentFragment extends Fragment {
                     }
                 });
 //                mProgressDialog.hide();
+            }
+        });
+
+
+        // Spinner Initiate
+        Spinner indicator_spinner = (Spinner) rootView.findViewById(R.id.indicator_spinner);
+        indicator_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                isTypeChanged = false;
+
+                String[] languages = getResources().getStringArray(R.array.indicator_labels);
+
+                if (!curr_type.equals(languages[pos].toUpperCase())) {
+                    curr_type = languages[pos].toUpperCase();
+                    Toast.makeText(getContext(), "你点击的是:"+languages[pos], Toast.LENGTH_SHORT).show();
+                    isTypeChanged = true;
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Another interface callback
             }
         });
         // Inflate the layout for this fragment
@@ -121,7 +156,7 @@ public class CurrentFragment extends Fragment {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("Error Volley", "Volley error");
+                Log.e("Error Volley", "Volley error: " + error.toString());
 
                 if (error == null || error.networkResponse == null) {
                     return;
@@ -139,6 +174,11 @@ public class CurrentFragment extends Fragment {
             }
         });
         // Add the request to the RequestQueue.
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                4000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
         AppController.getInstance().addToRequestQueue(stringRequest);
     }
 
@@ -219,5 +259,36 @@ public class CurrentFragment extends Fragment {
             Toast.makeText(getContext(),jsMessage,Toast.LENGTH_SHORT).show();
             Log.d("Debug Log:" , jsMessage);
         }
+    }
+
+    public void loadChart(String type) {
+        type = type.toUpperCase();
+        if(type.equals("PRICE")) {
+            webView.evaluateJavascript("javascript:load_price('" + target_symb + "')", new ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String value) {
+                    Toast.makeText(getContext(),"JS executed: PRICE", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            webView.evaluateJavascript("javascript:load_Chart('" + curr_type + "','"+ target_symb +"')", new ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String value) {
+                    Toast.makeText(getContext(),"JS executed: Chart", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    public void initChangeBtn() {
+        changeBtn = rootView.findViewById(R.id.change_btn);
+        changeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isTypeChanged) {
+                    loadChart(curr_type);
+                }
+            }
+        });
     }
 }

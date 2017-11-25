@@ -149,7 +149,6 @@ public class DetailActivity extends AppCompatActivity {
                 default:
                     return null;
             }
-
         }
 
         @Override
