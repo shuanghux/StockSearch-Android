@@ -5,9 +5,12 @@
     tools:context="com.example.shuanghu.stock.NewsFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ListView
+        android:id="@+id/news_table"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="News Fragment" />
+        android:paddingBottom="40dp">
+
+    </ListView>
 
 </FrameLayout>

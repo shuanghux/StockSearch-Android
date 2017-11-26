@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
@@ -46,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences FeedPref;
     ListView listView;
     public static final String EXTRA_SYMB_KEY = "extra_symbol_key";
+    public static final String EXTRA_URL_KEY = "extra_url_key";
     public static final String WEB_URL = "http://shuang.us-east-1.elasticbeanstalk.com/";
     private AutoCompleteTextView search_box;
 //    RequestQueue queue;
@@ -100,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 // Move to detail activity
                 Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
                 intent.putExtra(EXTRA_SYMB_KEY, target_symb);
+                intent.putExtra(EXTRA_URL_KEY, WEB_URL);
                 startActivity(intent);
             }
         });
@@ -157,9 +161,10 @@ public class MainActivity extends AppCompatActivity {
 
         listView = (ListView) findViewById(R.id.stock_list_view);
 
-        SimpleAdapter adapter = new SimpleAdapter(this, getFavData(), R.layout.fav_list,
-                new String[]{"symbol", "price", "change"},
-                new int[]{R.id.fav_symb, R.id.fav_price, R.id.fav_change});
+//        SimpleAdapter adapter = new SimpleAdapter(this, getFavData(), R.layout.fav_list,
+//                new String[]{"symbol", "price", "change"},
+//                new int[]{R.id.fav_symb, R.id.fav_price, R.id.fav_change});
+        FavStockAdapter adapter = new FavStockAdapter(MainActivity.this, R.layout.fav_list, getStockItems());
         listView.setAdapter(adapter);
     }
 
@@ -183,6 +188,39 @@ public class MainActivity extends AppCompatActivity {
             map.put("price", price);
             map.put("change", change);
             list.add(map);
+        }
+        return list;
+    }
+
+    private List<FavStockItem> getStockItems() throws JSONException {
+        FeedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        List<FavStockItem> list = new ArrayList<FavStockItem>();
+        Map<String, ?> allEntries = FeedPref.getAll();
+        ArrayList<String> favKeys = new ArrayList<>();
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            favKeys.add(entry.getKey());
+        }
+        for (String key : favKeys) {
+            String jsonStr = FeedPref.getString(key, null);
+            JSONObject jsonObj = new JSONObject(jsonStr);
+            String stock_symbol = jsonObj.getString("Stock Ticker Symbol");
+            String price = jsonObj.getString("Last Price");
+            String changeFullStr = jsonObj.getString("Change (Change Percent)");
+            String changeStr="", percentStr="";
+            Pattern changePattern = Pattern.compile("^(.+?)\\(.*");
+            Matcher matcher = changePattern.matcher(changeFullStr);
+            if(matcher.matches()) {
+                changeStr = matcher.group(1);
+            }
+            matcher = changePattern.matcher(changeFullStr);
+            if(matcher.matches()) {
+                percentStr = matcher.group(1);
+            }
+
+
+            Pattern percentPattern = Pattern.compile(".*\\((.+?)%\\).*");
+            FavStockItem item = new FavStockItem(stock_symbol,price,changeStr,percentStr);
+            list.add(item);
         }
         return list;
     }

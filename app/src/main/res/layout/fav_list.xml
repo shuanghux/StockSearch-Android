@@ -33,5 +33,11 @@
         android:paddingEnd="2dp"
         tools:ignore="RtlSymmetry" />
 
+    <ImageView
+        android:id="@+id/fav_arrow"
+        android:layout_weight=".2"
+        android:layout_width="0dip"
+        android:layout_height="18dp" />
+
 
 </LinearLayout>

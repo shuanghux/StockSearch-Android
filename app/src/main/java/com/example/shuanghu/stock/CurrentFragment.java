@@ -1,6 +1,7 @@
 package com.example.shuanghu.stock;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -67,6 +68,8 @@ public class CurrentFragment extends Fragment {
         rootView = inflater.inflate(R.layout.fragment_current, container, false);
         tableListView = (ListView) rootView.findViewById(R.id.stock_table);
         searchStock(target_symb);
+
+
 
         // Btn Change init
         initChangeBtn();
@@ -221,31 +224,6 @@ public class CurrentFragment extends Fragment {
         return list;
     }
 
-//    public List<TableItem> getTableItems() throws JSONException {
-//        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-//        Iterator<String> properties = tableInfoData.keys();
-//        int imgUp = R.drawable.up;
-//        int imgDown = R.drawable.down;
-//        while (properties.hasNext()) {
-//            String property = properties.next();
-//            Log.d("Property",property);
-//            String value = tableInfoData.getString(property);
-//            Map<String,Object> map = new HashMap<>();
-//            map.put("property",property);
-//            map.put("value",value);
-//
-//            if (property.matches("Change")) {
-//                if(value.matches("-")) {
-//                    ImageView imgView;
-//                    map.put("arrow", R.drawable.down);
-//                } else {
-//                    map.put("arrow",R.drawable.up);
-//                }
-//            }
-//            list.add(map);
-//        }
-//        return list;
-//    }
 
     public class JsHandler {
         String symbol;

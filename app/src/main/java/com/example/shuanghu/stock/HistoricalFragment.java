@@ -53,14 +53,16 @@ public class HistoricalFragment extends Fragment {
         // Inflate the layout for this fragment
         target_symb = getActivity().getIntent().getExtras().getString(MainActivity.EXTRA_SYMB_KEY);
         View rootView = inflater.inflate(R.layout.fragment_historical, container, false);
-        webView = (WebView) rootView.findViewById(R.id.webView);
+        // HighChart init
+        webView = (WebView) rootView.findViewById(R.id.history_webview);
         // Override method so that not using default browser
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        webView.setVerticalScrollBarEnabled(true);
 
-        webView.loadUrl("file:///android_asset/price_chart.html");
-        webView.addJavascriptInterface(new JsHandler(target_symb), "myHandler");
+        webView.loadUrl("file:///android_asset/history_chart.html");
+        //webView.addJavascriptInterface(new HistoryFragment.JsHandler(target_symb), "myMainHandler");
         webView.setWebViewClient(new WebViewClient(){
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -71,10 +73,10 @@ public class HistoricalFragment extends Fragment {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                webView.evaluateJavascript("javascript:mydisp('" + target_symb +": Debug" + "')", new ValueCallback<String>() {
+                webView.evaluateJavascript("javascript:loadHistory('" + target_symb + "')", new ValueCallback<String>() {
                     @Override
                     public void onReceiveValue(String value) {
-                        Toast.makeText(getContext(),"JS executed", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(),"JS executed: " + value, Toast.LENGTH_SHORT).show();
                     }
                 });
 //                mProgressDialog.hide();
@@ -92,7 +94,8 @@ public class HistoricalFragment extends Fragment {
         @JavascriptInterface
         public void sendToJava(String message) {
             jsMessage = message;
-            Toast.makeText(getContext(),jsMessage,Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getContext(),jsMessage,Toast.LENGTH_SHORT).show();
+            Log.d("Debug Log:" , jsMessage);
         }
     }
 
@@ -100,41 +103,41 @@ public class HistoricalFragment extends Fragment {
 
 
 
-    public void getPriceData(String target_symb) {
-        final String thisSymb = target_symb;
-        Log.i("Debug", "Button Pressed on" + thisSymb);
-        final String url = WEB_URL + "price/" + thisSymb;
-        // Volley request for stock table information
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.d("Debug: ", "Price data fetched");
-                        priceJsonString = response;
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("Error Volley", "Volley error");
-
-                if (error == null || error.networkResponse == null) {
-                    return;
-                }
-                String body;
-                //get status code here
-                final String statusCode = String.valueOf(error.networkResponse.statusCode);
-                //get response body and parse with appropriate encoding
-                try {
-                    body = new String(error.networkResponse.data, "UTF-8");
-                    Log.e("Request Error", body);
-                } catch (UnsupportedEncodingException e) {
-                    // exception
-                }
-            }
-        });
-        // Add the request to the RequestQueue.
-        AppController.getInstance().addToRequestQueue(stringRequest);
-    }
+//    public void getPriceData(String target_symb) {
+//        final String thisSymb = target_symb;
+//        Log.i("Debug", "Button Pressed on" + thisSymb);
+//        final String url = WEB_URL + "price/" + thisSymb;
+//        // Volley request for stock table information
+//        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+//                new Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String response) {
+//                        Log.d("Debug: ", "Price data fetched");
+//                        priceJsonString = response;
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.e("Error Volley", "Volley error");
+//
+//                if (error == null || error.networkResponse == null) {
+//                    return;
+//                }
+//                String body;
+//                //get status code here
+//                final String statusCode = String.valueOf(error.networkResponse.statusCode);
+//                //get response body and parse with appropriate encoding
+//                try {
+//                    body = new String(error.networkResponse.data, "UTF-8");
+//                    Log.e("Request Error", body);
+//                } catch (UnsupportedEncodingException e) {
+//                    // exception
+//                }
+//            }
+//        });
+//        // Add the request to the RequestQueue.
+//        AppController.getInstance().addToRequestQueue(stringRequest);
+//    }
 
 
 
