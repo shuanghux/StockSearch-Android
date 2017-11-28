@@ -15,6 +15,7 @@ function load_price(symbol) {
 				if(isDataOk(data)) {
 					data_PRICE = data;
 					showPrice(data);
+					getChartUrl();
 				}
 			})
 }
@@ -132,6 +133,7 @@ function load_Chart(type,symbol) {
 				//console.log(data);
 				chartDataSet[type] = data;
 				showChart(type);
+				getChartUrl();
 				
 			})
 			.fail(function() {
@@ -332,3 +334,29 @@ function showHistory() {
     });
     chart.reflow();
 }
+
+function getChartUrl() {
+	var chart = $("#container").highcharts();
+	var obj = {};
+    obj.svg = chart.getSVG();
+    obj.type = 'image/png';
+    obj.async = true;
+    var exportUrl = 'http://export.highcharts.com/';
+    var imgURL;
+    $.ajax({
+            type: "POST",
+            url: exportUrl,
+            data: obj,
+            cache:false,
+            async:true,
+            crossDomain:true,
+            success: function (data) {
+            	console.log("success: ");
+            	imgURL = exportUrl+data;
+            	window.myMainHandler.sendUrlToJava(imgURL);
+            },
+            error: function(data) {
+            	console.log("error");
+            }
+        });
+    }

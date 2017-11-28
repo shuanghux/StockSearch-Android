@@ -8,12 +8,17 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,11 +51,13 @@ public class MainActivity extends AppCompatActivity {
     private ListView stockListView;
     SharedPreferences.Editor fd;
     SharedPreferences FeedPref;
-    ListView listView;
+    ListView listView; // fav list
     public static final String EXTRA_SYMB_KEY = "extra_symbol_key";
     public static final String EXTRA_URL_KEY = "extra_url_key";
     public static final String WEB_URL = "http://shuang.us-east-1.elasticbeanstalk.com/";
     private AutoCompleteTextView search_box;
+    List<FavStockItem> favStocks;
+    String target_symb;
 //    RequestQueue queue;
 
 
@@ -58,16 +65,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        FeedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        FeedPref = getApplicationContext().getSharedPreferences("FavListSP", 0);
 //        queue = Volley.newRequestQueue(getApplicationContext());
         fd = FeedPref.edit();
         initInputBox();
         init_btn_getQuote();
+
+    }
+
+    protected void onResume() {
+        super.onResume();
         try {
             showFavList();
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        initFavPopup();
     }
 
     public void initInputBox() {
@@ -99,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String inputText = ((AutoCompleteTextView) findViewById(R.id.search_box)).getText().toString();
                 String words[] = inputText.split(" ", 2);
-                final String target_symb = words[0];
+                target_symb = words[0];
                 // Move to detail activity
                 Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
                 intent.putExtra(EXTRA_SYMB_KEY, target_symb);
@@ -164,13 +177,17 @@ public class MainActivity extends AppCompatActivity {
 //        SimpleAdapter adapter = new SimpleAdapter(this, getFavData(), R.layout.fav_list,
 //                new String[]{"symbol", "price", "change"},
 //                new int[]{R.id.fav_symb, R.id.fav_price, R.id.fav_change});
-        FavStockAdapter adapter = new FavStockAdapter(MainActivity.this, R.layout.fav_list, getStockItems());
+        favStocks = getStockItems();
+        FavStockAdapter adapter = new FavStockAdapter(MainActivity.this, R.layout.fav_list, favStocks);
         listView.setAdapter(adapter);
+
     }
 
     private List<Map<String, Object>> getFavData() throws JSONException {
-        FeedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+//        FeedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        FeedPref = getApplicationContext().getSharedPreferences("FavListSP", 0);
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
         Map<String, ?> allEntries = FeedPref.getAll();
         ArrayList<String> favKeys = new ArrayList<>();
         for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
@@ -193,8 +210,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private List<FavStockItem> getStockItems() throws JSONException {
-        FeedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+//        FeedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        FeedPref = getApplicationContext().getSharedPreferences("FavListSP", 0);
         List<FavStockItem> list = new ArrayList<FavStockItem>();
+
         Map<String, ?> allEntries = FeedPref.getAll();
         ArrayList<String> favKeys = new ArrayList<>();
         for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
@@ -206,20 +225,22 @@ public class MainActivity extends AppCompatActivity {
             String stock_symbol = jsonObj.getString("Stock Ticker Symbol");
             String price = jsonObj.getString("Last Price");
             String changeFullStr = jsonObj.getString("Change (Change Percent)");
+            long dateCreated = jsonObj.getLong("Date");
             String changeStr="", percentStr="";
             Pattern changePattern = Pattern.compile("^(.+?)\\(.*");
             Matcher matcher = changePattern.matcher(changeFullStr);
             if(matcher.matches()) {
                 changeStr = matcher.group(1);
             }
-            matcher = changePattern.matcher(changeFullStr);
+            Pattern percentPattern = Pattern.compile(".*\\((.+?)%\\).*");
+            matcher = percentPattern.matcher(changeFullStr);
             if(matcher.matches()) {
                 percentStr = matcher.group(1);
             }
 
 
-            Pattern percentPattern = Pattern.compile(".*\\((.+?)%\\).*");
-            FavStockItem item = new FavStockItem(stock_symbol,price,changeStr,percentStr);
+
+            FavStockItem item = new FavStockItem(stock_symbol,price,changeStr,percentStr,dateCreated);
             list.add(item);
         }
         return list;
@@ -232,6 +253,45 @@ public class MainActivity extends AppCompatActivity {
         fd = FeedPref.edit();
         fd.clear();
         fd.apply();
+    }
+
+    public void initFavPopup() {
+        // enable delete
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                PopupMenu popupMenu = new PopupMenu(MainActivity.this, view, Gravity.CENTER);
+                MenuInflater menuInflater = getMenuInflater();
+                menuInflater.inflate(R.menu.delete_popup_main,popupMenu.getMenu());
+                popupMenu.getMenu().findItem(R.id.popup_delete).setEnabled(false);
+                popupMenu.show();
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.popup_no:
+                                break;
+                            case R.id.popup_yes:
+                                Toast.makeText(getApplicationContext(),"You just deleted "+favStocks.get(position).getName(),Toast.LENGTH_SHORT).show();
+                                FeedPref = getApplicationContext().getSharedPreferences("FavListSP", 0);
+                                fd = FeedPref.edit();
+                                fd.remove(favStocks.get(position).getName());
+                                fd.apply();
+                                try {
+                                    showFavList();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        return true;
+                    }
+                });
+                return true;
+            }
+        });
     }
 
 }

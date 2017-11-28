@@ -41,16 +41,20 @@ android:layout_height="match_parent"
                 android:layout_width="0dip"
                 android:layout_height="fill_parent">
                 <Button
+                    android:id="@+id/detail_facebook_btn"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="@drawable/facebook"
                     android:layout_margin="10dp"
+                    android:enabled="true"
                     />
                 <Button
+                    android:id="@+id/detail_fav_btn"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_margin="10dp"
-                    android:background="@drawable/empty"/>
+                    android:background="@drawable/empty"
+                    android:enabled="false"/>
             </LinearLayout>
         </LinearLayout>
 

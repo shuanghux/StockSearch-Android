@@ -14,12 +14,16 @@ public class FavStockItem {
 
     private String changePercent;
 
+    private long dateCreated;
 
-    public FavStockItem(String name, String price, String change, String changePercent) {
+
+
+    public FavStockItem(String name, String price, String change, String changePercent, long dateCreated) {
         this.name = name;
         this.price = price;
         this.change = change;
         this.changePercent = changePercent;
+        this.dateCreated = dateCreated;
     }
 
     public String getName() {
@@ -35,5 +39,22 @@ public class FavStockItem {
     }
 
     public String getChangePercent() {return changePercent;}
+
+    public long getDateCreated() {
+        return dateCreated;
+    }
+
+    public double getPriceVal() {
+        return Double.parseDouble(price);
+    }
+
+    public double getChangeVal() {
+        return Double.parseDouble(change);
+    }
+
+    public double getChangePercentVal() {
+        return Double.parseDouble(changePercent);
+    }
+
 
 }
